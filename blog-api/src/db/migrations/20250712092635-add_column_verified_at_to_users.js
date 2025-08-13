@@ -1,0 +1,16 @@
+"use strict";
+
+/** @type {import('sequelize-cli').Migration} */
+module.exports = {
+  async up(queryInterface, Sequelize) {
+    await queryInterface.addColumn("users", "verified_at", {
+      type: Sequelize.DATE,
+      allowNull: true,
+      after: "linkedin_url",
+    });
+  },
+
+  async down(queryInterface, Sequelize) {
+    await queryInterface.removeColumn("users", "verified_at");
+  },
+};

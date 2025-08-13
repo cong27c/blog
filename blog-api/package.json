@@ -1,0 +1,53 @@
+{
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "ejs": "^3.1.10",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "module-alias": "^2.2.3",
+    "multer": "^2.0.2",
+    "mysql2": "^3.14.1",
+    "nanoid": "^5.1.5",
+    "node-cron": "^4.2.1",
+    "nodemailer": "^7.0.5",
+    "sequelize": "^6.37.7",
+    "slugify": "^1.6.6",
+    "speakingurl": "^14.0.1"
+  },
+  "scripts": {
+    "scheduler": "node -r module-alias/register src/tasks/index.js",
+    "worker": "node -r module-alias/register src/workers/queueWorker.js",
+    "dev": "node --watch ./server.js",
+    "db:migrate": "npx sequelize-cli db:migrate",
+    "db:migrate:schema:timestamps:add": "npx sequelize-cli db:migrate:schema:timestamps:add",
+    "db:migrate:status": "npx sequelize-cli db:migrate:status",
+    "db:migrate:undo": "npx sequelize-cli db:migrate:undo",
+    "db:migrate:undo:all": "npx sequelize-cli db:migrate:undo:all",
+    "db:seed": "npx sequelize-cli db:seed",
+    "db:seed:undo": "npx sequelize-cli db:seed:undo",
+    "db:seed:undo:all": "npx sequelize-cli db:seed:undo:all",
+    "db:create": "npx sequelize-cli db:create",
+    "db:drop": "npx sequelize-cli db:drop",
+    "init": "npx sequelize-cli init",
+    "init:config": "npx sequelize-cli init:config",
+    "init:migrations": "npx sequelize-cli init:migrations",
+    "init:models": "npx sequelize-cli init:models",
+    "init:seeders": "npx sequelize-cli init:seeders",
+    "migration:generate": "npx sequelize-cli migration:generate",
+    "migration:create": "npx sequelize-cli migration:create",
+    "model:generate": "npx sequelize-cli model:generate",
+    "model:create": "npx sequelize-cli model:create",
+    "seed:generate": "npx sequelize-cli seed:generate",
+    "seed:create": "npx sequelize-cli seed:create"
+  },
+  "_moduleAliases": {
+    "@": "src"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^9.8.0",
+    "sequelize-cli": "^6.6.3"
+  }
+}
