@@ -1,0 +1,85 @@
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as *;
+
+.postList {
+  width: 100%;
+}
+
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 2rem;
+  gap: 0.5rem;
+  font-size: 16px;
+}
+
+.pageButton {
+  padding: 8px 12px;
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.pageButton:hover:not(:disabled) {
+  background-color: #e5e7eb;
+}
+
+.pageButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.activePage {
+  background-color: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+.ellipsis {
+  padding: 8px 12px;
+  color: #9ca3af;
+  cursor: default;
+}
+
+.postsContainer {
+  &.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: $spacing-6;
+
+    @include mobile-only {
+      grid-template-columns: 1fr;
+      gap: $spacing-4;
+    }
+
+    @include tablet-up {
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    }
+  }
+
+  &.list {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-4;
+
+    .postItem {
+      width: 100%;
+    }
+  }
+}
+
+.postItem {
+  width: 100%;
+}
+
+.paginationContainer {
+  margin-top: $spacing-12;
+  
+  @include mobile-only {
+    margin-top: $spacing-8;
+  }
+}
