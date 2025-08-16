@@ -42,7 +42,7 @@ module.exports = (sequelize, DataTypes) => {
       },
     },
     {
-      tableName: "Topics",
+      tableName: "topics",
       underscored: true, // để Sequelize map created_at thay vì createdAt
       timestamps: false, // đã tự xử lý created_at/updated_at bằng tay
     }
