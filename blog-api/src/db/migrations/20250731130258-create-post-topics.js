@@ -7,7 +7,7 @@ module.exports = {
         type: Sequelize.INTEGER.UNSIGNED,
         allowNull: false,
         references: {
-          model: "posts", // chữ thường match DB
+          model: "posts",
           key: "id",
         },
         onDelete: "CASCADE",
@@ -17,7 +17,7 @@ module.exports = {
         type: Sequelize.INTEGER.UNSIGNED,
         allowNull: false,
         references: {
-          model: "topics", // chữ thường match DB
+          model: "topics",
           key: "id",
         },
         onDelete: "CASCADE",
