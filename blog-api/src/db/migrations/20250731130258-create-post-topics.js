@@ -2,12 +2,12 @@
 
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("PostTopics", {
+    await queryInterface.createTable("posttopics", {
       post_id: {
         type: Sequelize.INTEGER.UNSIGNED,
         allowNull: false,
         references: {
-          model: "Posts",
+          model: "posts", // chữ thường match DB
           key: "id",
         },
         onDelete: "CASCADE",
@@ -17,7 +17,7 @@ module.exports = {
         type: Sequelize.INTEGER.UNSIGNED,
         allowNull: false,
         references: {
-          model: "Topics",
+          model: "topics", // chữ thường match DB
           key: "id",
         },
         onDelete: "CASCADE",
@@ -31,12 +31,13 @@ module.exports = {
       updated_at: {
         allowNull: false,
         type: Sequelize.DATE,
-        defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
+        defaultValue: Sequelize.literal(
+          "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"
+        ),
       },
     });
 
-    // tạo index kết hợp để tránh trùng lặp quan hệ
-    await queryInterface.addConstraint("PostTopics", {
+    await queryInterface.addConstraint("posttopics", {
       fields: ["post_id", "topic_id"],
       type: "unique",
       name: "unique_post_topic",
@@ -44,6 +45,6 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("PostTopics");
+    await queryInterface.dropTable("posttopics");
   },
 };
