@@ -12,11 +12,23 @@ const notFoundHandler = require("@/middlewares/notFoundHandler");
 const errorsHandler = require("@/middlewares/errorHandler");
 const handlePagination = require("@/middlewares/handlePagination");
 const { sequelize } = require("./src/models");
+const allowedOrigins = process.env.CLIENT_URL.split(",");
 
 const app = express();
 
 //Middleware
-app.use(cors({ origin: "http://cblog.io.vn", credentials: true }));
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        return callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  })
+);
 app.use(express.static("public"));
 app.use(express.json());
 app.use(express.urlencoded());

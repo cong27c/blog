@@ -7,6 +7,7 @@ const { MAIL_SECRET, MAIL_EXPIRES_IN } = require("@/config/auth");
 const { where } = require("sequelize");
 const loadEmailTemplate = require("@/utils/loadEmailTemplate");
 const queue = require("@/utils/queue");
+const throwError = require("@/utils/throwError");
 
 /**
  * Register new user
@@ -51,6 +52,7 @@ const register = async (data, res) => {
 
 const login = async (email, password) => {
   const user = await User.findOne({ where: { email } });
+  if (!user.verified_at) throwError("Email chưa xác thực");
   if (!user) {
     throw new Error("Thông tin đăng nhập không hợp lệ.");
   }

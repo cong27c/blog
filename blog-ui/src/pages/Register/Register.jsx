@@ -115,6 +115,7 @@ const Register = () => {
           error: "Đăng ký thất bại. Vui lòng thử lại.",
         }
       );
+      navigate("/login");
 
       await dispatch(fetchUserProfile());
     } catch (error) {

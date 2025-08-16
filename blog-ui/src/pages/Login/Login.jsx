@@ -75,7 +75,7 @@ const Login = () => {
     try {
       const login = await dispatch(loginUser(formData)).unwrap();
       if (!login) {
-        toast.error("Đăng nhập thất bại! Sai tài khoản hoặc mật khẩu.");
+        toast.error("Sai thông tin đăng nhập hoặc chưa xác thực email");
         return;
       }
 
@@ -83,7 +83,7 @@ const Login = () => {
       dispatch(fetchUserProfile());
       navigate("/");
     } catch (error) {
-      toast.error("Đăng nhập thất bại! Sai tài khoản hoặc mật khẩu.");
+      toast.error("Sai thông tin đăng nhập hoặc chưa xác thực email");
       console.error(error);
     } finally {
       setIsSubmitting(false);
