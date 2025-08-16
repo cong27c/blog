@@ -2,23 +2,23 @@
 
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("refreshtokens", {
+    await queryInterface.createTable("refresh_tokens", {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER,
+        type: Sequelize.INTEGER.UNSIGNED,
       },
       token: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(500), // token dài hơn 255 ký tự
         allowNull: false,
         unique: true,
       },
       user_id: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.INTEGER.UNSIGNED,
         allowNull: false,
         references: {
-          model: "users",
+          model: "users", // bảng users phải tồn tại trước
           key: "id",
         },
         onDelete: "CASCADE",
@@ -26,10 +26,12 @@ module.exports = {
       },
       expires_at: {
         type: Sequelize.DATE,
+        allowNull: true,
       },
       is_revoked: {
         type: Sequelize.BOOLEAN,
         defaultValue: false,
+        allowNull: false,
       },
       created_at: {
         allowNull: false,
@@ -45,6 +47,6 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("refreshtokens");
+    await queryInterface.dropTable("refresh_tokens");
   },
 };
