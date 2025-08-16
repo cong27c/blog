@@ -25,10 +25,10 @@ module.exports = {
       });
     }
 
-    await queryInterface.bulkInsert("Bookmarks", bookmarks, {});
+    await queryInterface.bulkInsert("bookmarks", bookmarks, {});
   },
 
   async down(queryInterface) {
-    await queryInterface.bulkDelete("Bookmarks", null, {});
+    await queryInterface.bulkDelete("bookmarks", null, {});
   },
 };
