@@ -6,6 +6,7 @@ module.exports = {
       post_id: {
         type: Sequelize.INTEGER.UNSIGNED,
         allowNull: false,
+        primaryKey: true,
         references: {
           model: "posts",
           key: "id",
@@ -16,6 +17,7 @@ module.exports = {
       topic_id: {
         type: Sequelize.INTEGER.UNSIGNED,
         allowNull: false,
+        primaryKey: true,
         references: {
           model: "topics",
           key: "id",
