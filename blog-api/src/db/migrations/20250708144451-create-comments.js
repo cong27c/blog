@@ -1,16 +1,15 @@
-const { DataTypes } = require("sequelize");
+"use strict";
 
-module.exports = (sequelize) => {
-  const Comment = sequelize.define(
-    "Comment",
-    {
+module.exports = {
+  up: async function (queryInterface, Sequelize) {
+    await queryInterface.createTable("comments", {
       id: {
-        type: DataTypes.INTEGER.UNSIGNED,
+        type: Sequelize.INTEGER.UNSIGNED,
         autoIncrement: true,
         primaryKey: true,
       },
       user_id: {
-        type: DataTypes.INTEGER.UNSIGNED,
+        type: Sequelize.INTEGER.UNSIGNED,
         allowNull: false,
         references: {
           model: "users",
@@ -20,7 +19,7 @@ module.exports = (sequelize) => {
         onDelete: "CASCADE",
       },
       post_id: {
-        type: DataTypes.INTEGER.UNSIGNED,
+        type: Sequelize.INTEGER.UNSIGNED,
         allowNull: false,
         references: {
           model: "posts",
@@ -30,7 +29,7 @@ module.exports = (sequelize) => {
         onDelete: "CASCADE",
       },
       parent_id: {
-        type: DataTypes.INTEGER.UNSIGNED,
+        type: Sequelize.INTEGER.UNSIGNED,
         allowNull: true,
         references: {
           model: "comments",
@@ -40,30 +39,29 @@ module.exports = (sequelize) => {
         onDelete: "CASCADE",
       },
       content: {
-        type: DataTypes.TEXT,
+        type: Sequelize.TEXT,
         allowNull: false,
       },
       deleted_at: {
-        type: DataTypes.DATE,
+        type: Sequelize.DATE,
         allowNull: true,
       },
       created_at: {
-        type: DataTypes.DATE,
+        type: Sequelize.DATE,
         allowNull: false,
-        defaultValue: DataTypes.NOW,
+        defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
       },
       updated_at: {
-        type: DataTypes.DATE,
+        type: Sequelize.DATE,
         allowNull: false,
-        defaultValue: DataTypes.NOW,
+        defaultValue: Sequelize.literal(
+          "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"
+        ),
       },
-    },
-    {
-      tableName: "comments",
-      timestamps: false, // dùng tay để tạo created_at và updated_at
-      paranoid: false, // dùng deleted_at nhưng không bật soft delete mặc định
-    }
-  );
+    });
+  },
 
-  return Comment;
+  down: async function (queryInterface, Sequelize) {
+    await queryInterface.dropTable("comments");
+  },
 };

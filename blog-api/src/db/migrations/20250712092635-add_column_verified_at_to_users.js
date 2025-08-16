@@ -6,7 +6,6 @@ module.exports = {
     await queryInterface.addColumn("users", "verified_at", {
       type: Sequelize.DATE,
       allowNull: true,
-      after: "linkedin_url",
     });
   },
 
