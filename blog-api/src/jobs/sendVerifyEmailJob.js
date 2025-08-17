@@ -1,8 +1,8 @@
-const { MAIL_SECRET, MAIL_EXPIRES_IN } = require("@/config/auth");
-const transporter = require("@/config/mailer");
-const { User } = require("@/models");
-const jwtService = require("@/services/jwt.service");
-const loadEmailTemplate = require("@/utils/loadEmailTemplate");
+const { MAIL_SECRET, MAIL_EXPIRES_IN } = require("../config/auth");
+const transporter = require("../config/mailer");
+const { User } = require("../models");
+const jwtService = require("../services/jwt.service");
+const loadEmailTemplate = require("../utils/loadEmailTemplate");
 
 async function sendVerifyEmailJob(job) {
   try {

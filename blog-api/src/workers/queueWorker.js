@@ -1,5 +1,5 @@
 const sendVerifyEmailJob = require("../jobs/sendVerifyEmailJob");
-const { Queue } = require("@/models");
+const { Queue } = require("../models");
 const handlers = {
   sendVerifyEmailJob,
 };
