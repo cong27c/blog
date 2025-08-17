@@ -12,23 +12,13 @@ const notFoundHandler = require("@/middlewares/notFoundHandler");
 const errorsHandler = require("@/middlewares/errorHandler");
 const handlePagination = require("@/middlewares/handlePagination");
 const { sequelize } = require("./src/models");
-const allowedOrigins = (process.env.CLIENT_URL || "")
-  .split(",")
-  .map((o) => o.trim())
-  .filter(Boolean);
 
 const app = express();
 
 //Middleware
 app.use(
   cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      } else {
-        return callback(new Error("Not allowed by CORS"));
-      }
-    },
+    origin: true,
     credentials: true,
   })
 );
