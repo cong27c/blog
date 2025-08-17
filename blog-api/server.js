@@ -12,7 +12,10 @@ const notFoundHandler = require("@/middlewares/notFoundHandler");
 const errorsHandler = require("@/middlewares/errorHandler");
 const handlePagination = require("@/middlewares/handlePagination");
 const { sequelize } = require("./src/models");
-const allowedOrigins = process.env.CLIENT_URL.split(",");
+const allowedOrigins = (process.env.CLIENT_URL || "")
+  .split(",")
+  .map((o) => o.trim())
+  .filter(Boolean);
 
 const app = express();
 
