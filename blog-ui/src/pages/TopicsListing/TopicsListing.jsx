@@ -19,7 +19,13 @@ const TopicsListing = () => {
 
       try {
         const res = await getAllTopics(page, postsPerPage);
-        setTopics(res.items);
+
+        setTopics(
+          res.items?.map((topic) => ({
+            ...topic,
+            posts_count: topic.posts.length,
+          }))
+        );
         const computedTotalPages = Math.ceil(res.total / postsPerPage);
         if (page > computedTotalPages) {
           setPage(1);

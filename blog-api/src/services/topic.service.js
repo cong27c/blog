@@ -23,15 +23,26 @@ class TopicsService {
       offset,
       order: [["created_at", "DESC"]],
     });
-
     return { items, total };
   }
   async getTrendingTopic(limit = 6) {
-    const topics = await Topic.findAll({
-      order: [["posts_count", "DESC"]],
-      limit,
-    });
-    return topics;
+    // lấy tất cả topics
+    const topics = await Topic.findAll();
+
+    // map qua từng topic để đếm số bài viết
+    const withCounts = await Promise.all(
+      topics.map(async (topic) => {
+        const count = await topic.countPosts(); // Sequelize tự sinh khi có association
+        return {
+          ...topic.get({ plain: true }),
+          posts_count: count,
+        };
+      })
+    );
+
+    // sắp xếp giảm dần theo countPosts và giới hạn
+    withCounts.sort((a, b) => b.countPosts - a.countPosts);
+    return withCounts.slice(0, limit);
   }
 
   async getTopicBySlug(slug) {
@@ -55,7 +66,6 @@ class TopicsService {
 
     // const topic = await Topic.findOne({ where: { slug } });
     // if (!topic) return null;
-    console.log(slug);
     const posts = await Post.findAndCountAll({
       where: { status: "published" },
       include: [
@@ -71,7 +81,6 @@ class TopicsService {
       limit,
       offset,
     });
-    console.log(posts);
     return posts;
     // return {
     //   posts: rows,
