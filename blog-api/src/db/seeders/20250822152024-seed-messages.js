@@ -7,7 +7,6 @@ module.exports = {
   async up(queryInterface, Sequelize) {
     const messages = [];
 
-    // Một vài content mẫu
     const sampleContents = [
       "Hello, how are you?",
       "What's up?",
@@ -41,20 +40,34 @@ module.exports = {
       "Send me the link, please.",
     ];
 
-    // Lấy danh sách user_id từ bảng users (dùng queryInterface)
+    // 1. Lấy danh sách users
     const users = await queryInterface.sequelize.query(
       `SELECT id FROM users;`,
       { type: Sequelize.QueryTypes.SELECT }
     );
 
-    // Tạo message cho mỗi user
+    // 2. Lấy danh sách conversations
+    const conversations = await queryInterface.sequelize.query(
+      `SELECT id FROM conversation;`, // hoặc "conversations" tùy tên bảng thực
+      { type: Sequelize.QueryTypes.SELECT }
+    );
+
+    if (!users.length || !conversations.length) {
+      throw new Error(
+        "⚠️ Cần có dữ liệu users và conversations trước khi seed messages!"
+      );
+    }
+
+    // 3. Tạo messages hợp lệ
     for (const user of users) {
+      const conversation =
+        conversations[Math.floor(Math.random() * conversations.length)];
+
       messages.push({
         user_id: user.id,
-        conversation_id: Math.floor(Math.random() * 10) + 1, // random từ 1 -> 10
+        conversation_id: conversation.id, // dùng id có thật
         type: "text",
-        content:
-          sampleContents[Math.floor(Math.random() * sampleContents.length)],
+        content: faker.helpers.arrayElement(sampleContents),
         deleted_at: null,
         created_at: new Date(),
         updated_at: new Date(),
@@ -64,7 +77,7 @@ module.exports = {
     await queryInterface.bulkInsert("messages", messages, {});
   },
 
-  async down(queryInterface, Sequelize) {
+  async down(queryInterface) {
     await queryInterface.bulkDelete("messages", null, {});
   },
 };
