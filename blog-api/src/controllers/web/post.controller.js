@@ -51,11 +51,17 @@ const getAllPosts = async (req, res) => {
 
 const getPostsByTopic = async (req, res) => {
   try {
+    const userId = req.user.id;
     const { slug } = req.params;
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
 
-    const data = await postService.getPostsByTopicSlug(slug, page, limit);
+    const data = await postService.getPostsByTopicSlug(
+      slug,
+      userId,
+      page,
+      limit
+    );
 
     if (!data) {
       return res.status(404).json({ message: "Topic not found" });
@@ -67,7 +73,20 @@ const getPostsByTopic = async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 };
+
+const schedulePost = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const data = req.body;
+    const post = await postService.schedulePost(data, userId);
+
+    res.json({ success: true, post });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 module.exports = {
+  schedulePost,
   getPostsByStatus,
   getAllPosts,
   getPostsByCurrentUser,

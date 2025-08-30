@@ -1,4 +1,7 @@
-const { Comment, User, Like, Post } = require("@/models/index");
+const { Comment, User, Like, Post, UserSetting } = require("@/models/index");
+const { createNotification } = require("./notification.service");
+const { where } = require("sequelize");
+const pusher = require("@/config/pusher");
 module.exports = {
   async getPostComment(slug, page, limit, currentUserId) {
     const post = await Post.findOne({ where: { slug } });
@@ -59,6 +62,7 @@ module.exports = {
   async createComment({ user_id, post_id, content }) {
     try {
       // Tạo comment mới
+
       const comment = await Comment.create({ user_id, post_id, content });
 
       // Lấy comment vừa tạo kèm user (author)
@@ -92,6 +96,40 @@ module.exports = {
       }))
         ? true
         : false;
+      const post = await Post.findOne({ where: { id: post_id } });
+      let notification = null;
+      if (post.user_id !== user_id) {
+        const userSetting = await UserSetting.findOne({
+          where: { user_id: post.user_id },
+        });
+
+        if (!userSetting || userSetting.email_new_comments === true) {
+          notification = await createNotification({
+            userId: post.user_id,
+            type: "comment",
+            title: `${fullComment.author.user_name} đã bình luận bài viết của bạn`,
+            link: `/blog/${post.slug}`,
+            notifiableType: "Comment",
+            notifiableId: fullComment.id,
+            read: false,
+          });
+
+          // Push realtime bằng Pusher
+          await pusher.trigger(
+            `private-notifications-${post.user_id}`,
+            "new-notification",
+            { notification }
+          );
+        }
+      }
+
+      await pusher.trigger(
+        `private-notifications-${post.user_id}`,
+        "new-notification",
+        {
+          notification,
+        }
+      );
 
       return {
         id: fullComment.id,

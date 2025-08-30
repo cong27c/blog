@@ -1,9 +1,19 @@
-const { Post, Topic, Comment, User, sequelize } = require("@/models/index");
+const {
+  Post,
+  Topic,
+  Comment,
+  User,
+  sequelize,
+  UserSetting,
+  Follow,
+} = require("@/models/index");
 const { nanoid } = require("nanoid");
 const { where, Op } = require("sequelize");
 const { default: slugify } = require("slugify");
 const { Sequelize } = require("sequelize");
 const toSlug = require("@/utils/slug");
+const scheduleJob = require("@/utils/scheduler");
+const scheduleOnce = require("@/utils/scheduleOnce");
 
 class PostsService {
   async getAll(page, limit) {
@@ -50,9 +60,23 @@ class PostsService {
     return { items, total };
   }
 
-  async getFeaturePosts() {
+  async getFeaturePosts(userId) {
+    // Lấy danh sách user mà mình follow
+    const follows = await Follow.findAll({
+      where: { following_id: userId },
+      attributes: ["followed_id"],
+    });
+    const followingIds = follows.map((f) => f.followed_id);
+
     const featuredPosts = await Post.findAll({
-      where: { status: "published" },
+      where: {
+        status: "published",
+        [Op.or]: [
+          { visibility: "public" },
+          { visibility: "private", user_id: userId },
+          { visibility: "followers", user_id: followingIds },
+        ],
+      },
       attributes: {
         include: [
           [
@@ -64,8 +88,29 @@ class PostsService {
       include: [
         {
           model: User,
-          as: "author", // Phải đúng alias đã khai báo
+          as: "author",
           attributes: ["id", "email", "avatar", ["user_name", "username"]],
+          include: [
+            {
+              model: UserSetting,
+              as: "settings",
+              attributes: [
+                "allow_comments",
+                "show_view_counts",
+                "require_comment_approval",
+                "default_post_visibility",
+                "push_notifications",
+                "email_new_comments",
+                "email_new_likes",
+                "email_new_followers",
+                "email_weekly_digest",
+                "profile_visibility",
+                "allow_direct_messages",
+                "search_engine_indexing",
+                "show_email",
+              ],
+            },
+          ],
         },
         {
           model: Topic,
@@ -78,16 +123,60 @@ class PostsService {
       limit: 3,
     });
 
-    return featuredPosts?.map((p) => p.toJSON());
+    return featuredPosts?.map((p) => {
+      const post = p.toJSON();
+
+      if (post.author?.settings) {
+        post.author.settings = post.author.settings;
+      }
+
+      return post;
+    });
   }
-  async getLatestPosts() {
+
+  async getLatestPosts(userId) {
+    // lấy tất cả người mà mình follow (mình = following_id)
+    const follows = await Follow.findAll({
+      where: { following_id: userId },
+      attributes: ["followed_id"], // user mà mình follow
+    });
+    const followingIds = follows.map((f) => f.followed_id);
+
     const latestPosts = await Post.findAll({
-      where: { status: "published" },
+      where: {
+        status: "published",
+        [Op.or]: [
+          { visibility: "public" },
+          { visibility: "private", user_id: userId },
+          { visibility: "followers", user_id: followingIds },
+        ],
+      },
       include: [
         {
           model: User,
           as: "author",
           attributes: ["id", "email", "avatar", ["user_name", "username"]],
+          include: [
+            {
+              model: UserSetting,
+              as: "settings",
+              attributes: [
+                "allow_comments",
+                "show_view_counts",
+                "require_comment_approval",
+                "default_post_visibility",
+                "push_notifications",
+                "email_new_comments",
+                "email_new_likes",
+                "email_new_followers",
+                "email_weekly_digest",
+                "profile_visibility",
+                "allow_direct_messages",
+                "search_engine_indexing",
+                "show_email",
+              ],
+            },
+          ],
         },
         {
           model: Topic,
@@ -99,6 +188,7 @@ class PostsService {
       order: [["published_at", "DESC"]],
       limit: 6,
     });
+
     return latestPosts?.map((p) => p.toJSON());
   }
 
@@ -124,7 +214,7 @@ class PostsService {
     return post;
   }
 
-  async getPostsByTopicSlug(slug, page = 1, limit = 10) {
+  async getPostsByTopicSlug(slug, userId, page = 1, limit = 10) {
     try {
       const offset = (page - 1) * limit;
 
@@ -136,9 +226,23 @@ class PostsService {
         return null;
       }
 
+      // lấy danh sách user mà mình follow
+      const follows = await Follow.findAll({
+        where: { following_id: userId },
+        attributes: ["followed_id"],
+      });
+      const followingIds = follows.map((f) => f.followed_id);
+
       // Lấy post kèm phân trang
       const { rows: posts, count } = await Post.findAndCountAll({
-        where: { status: "published" },
+        where: {
+          status: "published",
+          [Op.or]: [
+            { visibility: "public" },
+            { visibility: "private", user_id: userId },
+            { visibility: "followers", user_id: followingIds },
+          ],
+        },
         include: [
           {
             model: Topic,
@@ -172,12 +276,69 @@ class PostsService {
       throw error;
     }
   }
+  async schedulePost(data, userId) {
+    try {
+      const {
+        title,
+        content,
+        description,
+        cover,
+        thumbnail,
+        meta_title,
+        meta_description,
+        topics,
+        visibility,
+        status,
+        publishDate,
+        isScheduled,
+      } = data;
+
+      // tạo slug sau khi đã có title
+      const slug = toSlug(title);
+
+      const post = await Post.create({
+        title,
+        slug,
+        content,
+        description,
+        cover,
+        thumbnail,
+        meta_title,
+        meta_description,
+        topics: JSON.stringify(topics || []),
+        visibility,
+        status: isScheduled ? "scheduled" : status || "draft",
+        publishDate: isScheduled ? new Date(publishDate) : new Date(),
+        user_id: userId,
+      });
+
+      if (isScheduled) {
+        scheduleOnce(`publish_post_${post.id}`, publishDate, async () => {
+          post.status = "published";
+          post.published_at = new Date();
+
+          await post.save();
+          console.log(`✅ Post ${post.id} đã publish tự động!`);
+        });
+      }
+
+      return post;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
 
   async create(data) {
     data.slug = toSlug(data.title);
-
     const topics = Array.isArray(data.topics) ? data.topics : [];
     delete data.topics;
+    if (!data.visibility) {
+      const userSetting = await UserSetting.findOne({
+        where: { userId: data.userId },
+      });
+      data.visibility = userSetting?.defaultPostVisibility || "public"; // fallback
+    }
 
     // tạo post trong transaction để atomic
     const result = await sequelize.transaction(async (t) => {

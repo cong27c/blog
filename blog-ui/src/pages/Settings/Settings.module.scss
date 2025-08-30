@@ -347,6 +347,10 @@
 .dangerTitle {
     color: $error-600 !important;
 }
+.error {
+    color: red;
+    font-style: italic;
+}
 
 .dangerZone {
     border: 1px solid $error-200;

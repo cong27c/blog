@@ -5,7 +5,9 @@ const {
   Follow,
   Like,
   sequelize,
+  UserSetting,
 } = require("@/models/index");
+const { Op } = require("sequelize");
 
 const getProfile = async (username, currentUserId = null) => {
   try {
@@ -28,6 +30,11 @@ const getProfile = async (username, currentUserId = null) => {
         "created_at",
       ],
     });
+    const settings = await UserSetting.findOne({ where: { user_id: user.id } });
+
+    if (!settings) {
+      throw new Error("settings not found");
+    }
 
     if (!user) {
       throw new Error("User not found");
@@ -88,6 +95,7 @@ const getProfile = async (username, currentUserId = null) => {
       location: user.address || "Hanoi",
       website: user.website_url,
       joinedDate: user.created_at,
+      settings,
       social: {
         twitter: user.twitter_url,
         github: user.github_url,
@@ -115,9 +123,24 @@ const getProfile = async (username, currentUserId = null) => {
   }
 };
 
-async function getByUsername(username, page = 1, limit = 10) {
+async function getByUsername(username, userId, page = 1, limit = 10) {
   const offset = (page - 1) * limit;
+
+  // lấy danh sách user mà mình follow
+  const follows = await Follow.findAll({
+    where: { following_id: userId },
+    attributes: ["followed_id"],
+  });
+  const followingIds = follows.map((f) => f.followed_id);
+
   const { rows: items, count: total } = await Post.findAndCountAll({
+    where: {
+      [Op.or]: [
+        { visibility: "public" },
+        { visibility: "private", user_id: userId },
+        { visibility: "followers", user_id: followingIds },
+      ],
+    },
     limit,
     offset,
     order: [["created_at", "DESC"]],

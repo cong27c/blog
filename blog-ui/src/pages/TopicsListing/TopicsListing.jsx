@@ -19,6 +19,7 @@ const TopicsListing = () => {
 
       try {
         const res = await getAllTopics(page, postsPerPage);
+        console.log(res);
 
         setTopics(
           res.items?.map((topic) => ({
@@ -91,7 +92,6 @@ const TopicsListing = () => {
           </p>
         </header>
 
-        {/* Topics Grid */}
         <section className={styles.content}>
           <TopicList topics={topics} loading={loading} />
         </section>

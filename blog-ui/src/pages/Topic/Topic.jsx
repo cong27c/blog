@@ -34,10 +34,10 @@ const Topic = () => {
       try {
         const topic = await getTopicBySlug(slug);
         const data = await getPostBySlugTopic(slug, currentPage, postsPerPage);
-        console.log(topic);
+        console.log(data);
         setPosts(data.posts);
         setTotalPages(data.pagination.totalPages);
-        setTopic(topic);
+        setTopic({ ...topic, postCount: data.posts.length });
 
         // Calculate total pages
         // setTotalPages(Math.ceil(totalPostsCount / postsPerPage));
@@ -87,6 +87,7 @@ const Topic = () => {
     <div className={styles.topicPage}>
       <div className="container">
         {/* Topic Header */}
+        {console.log(topic)}
         <TopicHeader topic={topic} />
 
         {/* Posts List */}

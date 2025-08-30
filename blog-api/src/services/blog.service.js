@@ -1,4 +1,11 @@
-const { Post, User, Topic, Sequelize, Comment } = require("@/models/index");
+const {
+  Post,
+  User,
+  Topic,
+  Sequelize,
+  Comment,
+  UserSetting,
+} = require("@/models/index");
 const estimateReadTime = require("@/utils/estimateReadTime");
 const { where, Op } = require("sequelize");
 
@@ -55,6 +62,7 @@ class BlogsService {
         views: post.views_count,
         tags: post.topics.map((t) => t.name),
         author: {
+          authorId: author.id,
           name: author.user_name,
           title: author.title,
           about: author.about,
@@ -86,43 +94,81 @@ class BlogsService {
 
   async getRelatedPostsByTopic(topics = [], excludePostId, limit = 3) {
     try {
-      return await Post.findAll({
-        where: {
-          id: { [Op.ne]: excludePostId },
-          status: "published",
-        },
-        include: [
-          {
-            model: Topic,
-            as: "topics",
-            attributes: ["id", "name", "slug"],
-            through: { attributes: [] },
-            required: true, // cần thiết để join hiệu quả
+      let relatedPosts = [];
+
+      if (topics.length) {
+        // Lấy post liên quan tới topic
+        relatedPosts = await Post.findAll({
+          where: {
+            id: { [Op.ne]: excludePostId },
+            status: "published",
           },
-          {
-            model: User,
-            as: "author",
-            attributes: ["id", ["user_name", "name"], "avatar"],
+          include: [
+            {
+              model: Topic,
+              as: "topics",
+              attributes: ["id", "name", "slug"],
+              through: { attributes: [] },
+              where: { name: { [Op.in]: topics } },
+              required: true,
+            },
+            {
+              model: User,
+              as: "author",
+              attributes: ["id", ["user_name", "name"], "avatar"],
+              include: [
+                {
+                  model: UserSetting,
+                  as: "settings",
+                },
+              ],
+            },
+          ],
+          order: [["published_at", "DESC"]],
+          limit,
+          subQuery: false,
+        });
+      }
+
+      // Nếu thiếu bài → lấy thêm từ các post khác
+      if (relatedPosts.length < limit) {
+        const excludeIds = [excludePostId, ...relatedPosts.map((p) => p.id)];
+        const additionalPosts = await Post.findAll({
+          where: {
+            id: { [Op.notIn]: excludeIds },
+            status: "published",
           },
-        ],
-        // Lọc post theo topic ở tầng ngoài dùng having hoặc subquery
-        // Cách này: lọc bài post có ÍT NHẤT 1 topic trong danh sách
-        having: Sequelize.where(
-          Sequelize.literal(`EXISTS (
-        SELECT 1 FROM PostTopics pt
-        INNER JOIN Topics t ON pt.topic_id = t.id
-        WHERE pt.post_id = Post.id
-        AND t.name IN (${topics.map(() => "?").join(",")})
-      )`),
-          true
-        ),
-        replacements: topics, // giá trị cho `?` bên trên
-        order: [["published_at", "DESC"]],
-        limit,
-        subQuery: false,
-      });
+          include: [
+            {
+              model: User,
+              as: "author",
+              attributes: ["id", ["user_name", "name"], "avatar"],
+              include: [
+                {
+                  model: UserSetting,
+                  as: "settings",
+                },
+              ],
+            },
+            {
+              model: Topic,
+              as: "topics",
+              attributes: ["id", "name", "slug"],
+              through: { attributes: [] },
+            },
+          ],
+          order: Sequelize.literal("RAND()"), // lấy ngẫu nhiên
+          limit: limit - relatedPosts.length,
+          subQuery: false,
+        });
+
+        relatedPosts = relatedPosts.concat(additionalPosts);
+      }
+
+      return relatedPosts;
     } catch (error) {
       console.log(error);
+      return [];
     }
   }
 }

@@ -15,6 +15,8 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "conversation_id",
         as: "conversation",
       });
+
+      Message.belongsTo(models.User, { foreignKey: "user_id", as: "sender" });
     }
   }
 

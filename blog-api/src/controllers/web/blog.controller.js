@@ -15,6 +15,7 @@ exports.getBlogDetail = async (req, res) => {
     return response.error(res, 500, "Internal server error.");
   }
 };
+
 exports.getRelatedPosts = async (req, res) => {
   try {
     const { topics, excludeId } = req.query;

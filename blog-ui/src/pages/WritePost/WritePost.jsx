@@ -7,7 +7,11 @@ import FallbackImage from "../../components/FallbackImage/FallbackImage";
 import RichTextEditor from "../../components/RichTextEditor/RichTextEditor";
 import PublishModal from "../../components/PublishModal/PublishModal";
 import styles from "./WritePost.module.scss";
-import { createPost, uploadFile } from "@/services/postService";
+import {
+  createPost,
+  postSchedulePost,
+  uploadFile,
+} from "@/services/postService";
 import toast from "react-hot-toast";
 
 const WritePost = () => {
@@ -210,32 +214,27 @@ const WritePost = () => {
   };
 
   const handlePublish = async (publishData) => {
-    if (!validateForm()) return;
-
-    setSaving(true);
-
     try {
-      const postData = {
-        ...publishData,
-        status: "published",
-        published_at: new Date().toISOString(),
-      };
-
-      await toast.promise(createPost(postData), {
-        loading: "Đang đăng bài...",
-        success: "Đăng bài viết thành công ✅",
-        error: "Không thể đăng bài viết!",
-      });
+      let res;
+      if (publishData.isScheduled) {
+        res = await postSchedulePost(publishData);
+        toast.success("Đặt lịch tạo post thành công");
+      } else {
+        res = await createPost({
+          ...publishData,
+          status: "published",
+          published_at: new Date().toISOString(),
+        });
+        toast.success("Tạo bài post thành công");
+      }
 
       setShowPublishModal(false);
       navigate("/my-posts");
     } catch (error) {
-      console.error("Error publishing post:", error);
-    } finally {
-      setSaving(false);
+      console.error(error);
+      toast.error("Lỗi khi publish post");
     }
   };
-
   const wordCount = formData.content
     .split(/\s+/)
     .filter((word) => word.length > 0).length;

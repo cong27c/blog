@@ -21,6 +21,20 @@ const generateAccessToken = (
     expires_in: JWT_EXPIRES_IN,
   };
 };
+const generateUpdateEmailToken = (
+  userId,
+  email,
+  secret = MAIL_SECRET,
+  expires = JWT_EXPIRES_IN
+) => {
+  const token = jwt.sign({ userId, email }, secret, { expiresIn: expires });
+
+  return {
+    access_token: token,
+    token_type: TOKEN_TYPE,
+    expires_in: JWT_EXPIRES_IN,
+  };
+};
 
 /**
  * Verify access token
@@ -32,6 +46,7 @@ const verifyAccessToken = (token, jwtSecret = JWT_SECRET) => {
 };
 
 module.exports = {
+  generateUpdateEmailToken,
   generateAccessToken,
   verifyAccessToken,
 };

@@ -5,6 +5,7 @@ import FullscreenLayout from "../layouts/FullscreenLayout/FullscreenLayout";
 import AuthLayout from "../layouts/AuthLayout/AuthLayout";
 import Loading from "./Loading/Loading";
 import ErrorBoundary from "./ErrorBoundary/ErrorBoundary";
+import VerifySettingEmail from "./VerifySettingEmail";
 
 // Lazy load pages for better performance
 const Home = lazy(() => import("../pages/Home/Home"));
@@ -96,6 +97,14 @@ const AppRoutes = () => {
             element={
               <AuthLayout>
                 <VerifyEmail />
+              </AuthLayout>
+            }
+          />
+          <Route
+            path="/settings/email/verify"
+            element={
+              <AuthLayout>
+                <VerifySettingEmail />
               </AuthLayout>
             }
           />

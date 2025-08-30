@@ -17,6 +17,11 @@ export const getTopicBySlug = async (slug) => {
   const res = await httpRequest.get(`/topics/${slug}`);
   return res.data;
 };
+
+export const postSchedulePost = async (data) => {
+  const res = await httpRequest.post(`/posts/schedule`, data);
+  return res.data;
+};
 export const getPostByTopic = async (slug, page, limit) => {
   const res = await httpRequest.get(
     `/topics/${slug}/posts?page=${page}&limit=${limit}`

@@ -1,5 +1,6 @@
 const response = require("@/utils/response");
 const authService = require("@/services/auth.service");
+const throwError = require("@/utils/throwError");
 
 const register = async (req, res) => {
   try {
@@ -8,6 +9,46 @@ const register = async (req, res) => {
     response.success(res, 200, tokenData);
   } catch (error) {
     response.error(res, 401, error.message);
+  }
+};
+
+const generateSecret = async (req, res) => {
+  try {
+    const userId = req.user.id; // giả sử bạn có middleware auth gán req.user
+    const result = await authService.generate2FASecret(userId);
+    const qrCode = result.qrCode;
+    response.success(res, 200, qrCode);
+  } catch (error) {
+    console.log(error);
+    response.error(res, 500, error.message);
+  }
+};
+
+const confirm2FASetup = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { otp } = req.body;
+
+    if (!otp) {
+      throwError("Vui lòng nhập OTP");
+    }
+
+    const result = await authService.confirm2FASetup(userId, otp);
+    response.success(res, 200, result);
+  } catch (error) {
+    console.log(error);
+    response.error(res, 400, error.message);
+  }
+};
+
+const verifyOtp = async (req, res) => {
+  try {
+    const { userId, otp } = req.body;
+    const result = await authService.verifyLoginOtp(userId, otp);
+    response.success(res, 200, result);
+  } catch (error) {
+    console.log(error);
+    response.error(res, 400, error.message);
   }
 };
 
@@ -61,6 +102,27 @@ const resetPassword = async (req, res) => {
     res.status(200).send("");
   } catch (error) {
     throw new Error(error);
+  }
+};
+
+const resetPasswordLoggedIn = async (req, res) => {
+  try {
+    const userId = req.user.id; // từ authJWT middleware
+    const { currentPassword, newPassword } = req.body;
+
+    const success = await authService.resetPasswordLoggedIn(
+      userId,
+      currentPassword,
+      newPassword
+    );
+
+    if (!success) {
+      return response.error(res, 400, "Current password is incorrect");
+    }
+    return response.success(res, 200, { success: true });
+  } catch (error) {
+    console.error(error);
+    return response.error(res, 400, error.message);
   }
 };
 
@@ -122,6 +184,9 @@ const logout = async (req, res) => {
 };
 
 module.exports = {
+  resetPasswordLoggedIn,
+  generateSecret,
+  verifyOtp,
   logout,
   register,
   login,
@@ -130,4 +195,5 @@ module.exports = {
   verify,
   sendForgotEmail,
   resetPassword,
+  confirm2FASetup,
 };

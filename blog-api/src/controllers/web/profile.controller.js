@@ -14,11 +14,17 @@ const getProfile = async (req, res) => {
 };
 const getPostsByCurrentUser = async (req, res) => {
   try {
+    const userId = req.user.id;
     const username = req.params.username;
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
 
-    const data = await profileService.getByUsername(username, page, limit);
+    const data = await profileService.getByUsername(
+      username,
+      userId,
+      page,
+      limit
+    );
     response.success(res, 200, data);
   } catch (err) {
     console.error(err);

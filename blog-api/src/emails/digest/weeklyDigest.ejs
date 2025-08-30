@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Weekly Digest - Bản Tin Tuần</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        color: #333;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 3rem;
+        color: white;
+      }
+
+      .header h1 {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+      }
+
+      .header p {
+        font-size: 1.2rem;
+        opacity: 0.9;
+        font-weight: 300;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+      }
+
+      .stat-card {
+        background: white;
+        padding: 2rem;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .stat-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+      }
+
+      .stat-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+      }
+
+      .stat-icon {
+        width: 60px;
+        height: 60px;
+        margin: 0 auto 1rem;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+      }
+
+      .stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #667eea;
+        margin-bottom: 0.5rem;
+      }
+
+      .stat-label {
+        font-size: 1rem;
+        color: #666;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 500;
+      }
+
+      .top-posts {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .top-posts::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #f093fb, #f5576c);
+      }
+
+      .section-title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        color: #333;
+        text-align: center;
+        position: relative;
+      }
+
+      .section-title::after {
+        content: "";
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 50px;
+        height: 3px;
+        background: linear-gradient(90deg, #f093fb, #f5576c);
+        border-radius: 2px;
+      }
+
+      .posts-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+
+      .post-item {
+        display: flex;
+        align-items: center;
+        padding: 1.5rem;
+        background: #f8f9fa;
+        border-radius: 15px;
+        transition: all 0.3s ease;
+        border-left: 4px solid transparent;
+        position: relative;
+      }
+
+      .post-item:hover {
+        background: #fff;
+        border-left-color: #f093fb;
+        transform: translateX(10px);
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+      }
+
+      .post-rank {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #f093fb, #f5576c);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin-right: 1.5rem;
+        flex-shrink: 0;
+      }
+
+      .post-content {
+        flex: 1;
+      }
+
+      .post-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.5rem;
+        line-height: 1.4;
+      }
+
+      .post-meta {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        color: #666;
+        font-size: 0.9rem;
+      }
+
+      .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+      }
+
+      .views-badge {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-left: auto;
+      }
+
+      .footer {
+        text-align: center;
+        margin-top: 3rem;
+        color: white;
+        opacity: 0.8;
+      }
+
+      /* Responsive Design */
+      @media (max-width: 768px) {
+        .container {
+          padding: 1rem;
+        }
+
+        .header h1 {
+          font-size: 2rem;
+        }
+
+        .stats-grid {
+          grid-template-columns: 1fr;
+          gap: 1rem;
+        }
+
+        .stat-card {
+          padding: 1.5rem;
+        }
+
+        .post-item {
+          flex-direction: column;
+          text-align: center;
+          gap: 1rem;
+        }
+
+        .post-rank {
+          margin-right: 0;
+        }
+
+        .views-badge {
+          margin-left: 0;
+        }
+      }
+
+      /* Animation */
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .stat-card,
+      .top-posts {
+        animation: fadeInUp 0.6s ease forwards;
+      }
+
+      .stat-card:nth-child(2) {
+        animation-delay: 0.1s;
+      }
+
+      .stat-card:nth-child(3) {
+        animation-delay: 0.2s;
+      }
+
+      .top-posts {
+        animation-delay: 0.3s;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Header -->
+      <div class="header">
+        <h1>📊 Weekly Digest</h1>
+        <p>Bản tin tuần - Thống kê và bài viết nổi bật</p>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">👥</div>
+          <div class="stat-number">
+            <%= typeof followers !== 'undefined' ? followers.toLocaleString() :
+            '0' %>
+          </div>
+          <div class="stat-label">Followers</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon">❤️</div>
+          <div class="stat-number">
+            <%= typeof totalLikes !== 'undefined' ? totalLikes.toLocaleString()
+            : '0' %>
+          </div>
+          <div class="stat-label">Total Likes</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon">👁️</div>
+          <div class="stat-number">
+            <%= typeof totalViews !== 'undefined' ? totalViews.toLocaleString()
+            : '0' %>
+          </div>
+          <div class="stat-label">Total Views</div>
+        </div>
+      </div>
+
+      <!-- Top Posts -->
+      <div class="top-posts">
+        <h2 class="section-title">🏆 Top 3 Bài Viết Có Lượt Xem Nhiều Nhất</h2>
+
+        <div class="posts-list">
+          <% if (typeof topPosts !== 'undefined' && topPosts.length > 0) { %> <%
+          topPosts.forEach((post, index) => { %>
+          <div class="post-item">
+            <div class="post-rank"><%= index + 1 %></div>
+            <div class="post-content">
+              <div class="post-title"><%= post.title %></div>
+              <div class="post-meta">
+                <div class="meta-item">
+                  <span>📅</span>
+                  <span
+                    ><%= new Date(post.created_at).toLocaleDateString('vi-VN')
+                    %></span
+                  >
+                </div>
+                <div class="meta-item">
+                  <span>💬</span>
+                  <span><%= post.comments_count || 0 %> comments</span>
+                </div>
+                <div class="meta-item">
+                  <span>❤️</span>
+                  <span><%= post.likes_count || 0 %> likes</span>
+                </div>
+              </div>
+            </div>
+            <div class="views-badge">
+              👁️ <%= post.views_count.toLocaleString() %> views
+            </div>
+          </div>
+          <% }); %> <% } else { %>
+          <div class="post-item">
+            <div class="post-content">
+              <div class="post-title">Chưa có dữ liệu bài viết</div>
+              <div class="post-meta">
+                <div class="meta-item">
+                  <span>📝</span>
+                  <span>Hãy tạo thêm bài viết để thấy thống kê tại đây</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="footer">
+        <p>
+          © 2025 Weekly Digest - Cập nhật lúc <%= new
+          Date().toLocaleString('vi-VN') %>
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

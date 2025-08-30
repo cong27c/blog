@@ -1,10 +1,13 @@
+const sendWeeklyDigestJob = require("@/jobs/sendWeeklyDigestJob");
 const sendVerifyEmailJob = require("../jobs/sendVerifyEmailJob");
 const { Queue } = require("../models");
 const handlers = {
   sendVerifyEmailJob,
+  sendWeeklyDigestJob,
 };
 
 async function jobProcess(job) {
+  console.log(job);
   const handler = handlers[job.type];
   if (handler) {
     try {

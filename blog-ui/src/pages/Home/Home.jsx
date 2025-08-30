@@ -7,12 +7,17 @@ import {
   getLatestPosts,
   getTrendingTopics,
 } from "@/services/homeService";
+import socketClient from "@/utils/socketClient";
 
 const Home = () => {
   const [loading, setLoading] = useState(true);
   const [featuredPosts, setFeaturedPosts] = useState([]);
   const [latestPosts, setLatestPosts] = useState([]);
   const [trendingTopics, setTrendingTopics] = useState([]);
+
+  useEffect(() => {
+    const channel = socketClient.subscribe("k12");
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {

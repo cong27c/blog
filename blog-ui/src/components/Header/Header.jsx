@@ -7,6 +7,11 @@ import NotificationDropdown from "../NotificationDropdown/NotificationDropdown";
 import styles from "./Header.module.scss";
 import { useDispatch, useSelector } from "react-redux";
 import { logoutAsync } from "@/features/auth/authAsync";
+import { markAllAsRead, markAsRead } from "@/services/notificationService";
+import {
+  markAllAsReadSlice,
+  markAsReadSlice,
+} from "@/features/notification/notificationSlice";
 
 const Header = () => {
   const dispatch = useDispatch();
@@ -21,42 +26,8 @@ const Header = () => {
   const dropdownRef = useRef(null);
   const notificationRef = useRef(null);
 
-  const mockNotifications = [
-    {
-      id: 1,
-      type: "like",
-      message: 'Sarah Johnson liked your post "Advanced React Patterns"',
-      link: "/blog/advanced-react-patterns",
-      read: false,
-      createdAt: "2024-01-20T10:30:00Z",
-    },
-    {
-      id: 2,
-      type: "comment",
-      message: 'Mike Chen commented on your post "Building Scalable APIs"',
-      link: "/blog/building-scalable-apis",
-      read: false,
-      createdAt: "2024-01-20T09:15:00Z",
-    },
-    {
-      id: 3,
-      type: "follow",
-      message: "Emily Rodriguez started following you",
-      link: "/profile/emily-rodriguez",
-      read: true,
-      createdAt: "2024-01-19T16:45:00Z",
-    },
-    {
-      id: 4,
-      type: "like",
-      message: 'David Kim and 5 others liked your post "CSS Grid Guide"',
-      link: "/blog/css-grid-guide",
-      read: true,
-      createdAt: "2024-01-19T14:20:00Z",
-    },
-  ];
+  const notifications = useSelector((state) => state.notifications.list);
 
-  const [notifications, setNotifications] = useState(mockNotifications);
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   const toggleUserDropdown = () => {
@@ -77,20 +48,14 @@ const Header = () => {
     setIsDropdownOpen(false);
   };
 
-  const handleMarkAsRead = (notificationId) => {
-    setNotifications((prev) =>
-      prev.map((notification) =>
-        notification.id === notificationId
-          ? { ...notification, read: true }
-          : notification
-      )
-    );
+  const handleMarkAsRead = async (notificationId) => {
+    dispatch(markAsReadSlice(notificationId));
+    markAsRead();
   };
 
   const handleMarkAllAsRead = () => {
-    setNotifications((prev) =>
-      prev.map((notification) => ({ ...notification, read: true }))
-    );
+    dispatch(markAllAsReadSlice());
+    markAllAsRead();
   };
 
   // Close dropdown/notification on clicking outside
@@ -155,8 +120,6 @@ const Header = () => {
                     unreadCount={unreadCount}
                     isOpen={isNotificationOpen}
                     onToggle={handleNotificationToggle}
-                    onMarkAsRead={handleMarkAsRead}
-                    onMarkAllAsRead={handleMarkAllAsRead}
                   />
                 </div>
 

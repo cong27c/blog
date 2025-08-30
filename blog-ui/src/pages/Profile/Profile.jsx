@@ -8,6 +8,7 @@ import EmptyState from "../../components/EmptyState/EmptyState";
 import Loading from "../../components/Loading/Loading";
 import FallbackImage from "../../components/FallbackImage/FallbackImage";
 import ChatWindow from "../../components/ChatWindow/ChatWindow";
+import { Helmet } from "react-helmet"; // 👉 thêm thư viện này
 
 import styles from "./Profile.module.scss";
 import {
@@ -43,7 +44,6 @@ const Profile = () => {
       setLoading(true);
       try {
         const profile = await getProfile(username);
-
         if (!isOwnProfile) {
           const followingStatus = await checkFollowing(profile.id);
           setIsFollowing(followingStatus);
@@ -167,9 +167,55 @@ const Profile = () => {
       </div>
     );
   }
+
+  if (!isOwnProfile) {
+    if (profile.settings?.profile_visibility === "private") {
+      return (
+        <div className={styles.profile}>
+          <div className="container">
+            <EmptyState
+              title="Private Profile"
+              description="This profile is private. Only the user can view it."
+              icon="🔒"
+            />
+          </div>
+        </div>
+      );
+    }
+
+    if (profile.settings?.profile_visibility === "followers" && !isFollowing) {
+      return (
+        <div className={styles.profile}>
+          <div className="container">
+            <EmptyState
+              title="Followers Only"
+              description="Follow this user to see their posts and information."
+              icon="👥"
+            />
+            <div className={styles.actions}>
+              <Button
+                variant={isFollowing ? "secondary" : "primary"}
+                size="md"
+                onClick={handleFollowClick}
+              >
+                {isFollowing ? "Unfollow" : "Follow"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+  }
+
   return (
     <div className={styles.profile}>
       {/* Cover Section */}
+      <Helmet>
+        {profile.settings?.search_engine_indexing === false && (
+          <meta name="robots" content="noindex, nofollow" />
+        )}
+      </Helmet>
+
       <div className={styles.coverSection}>
         <div className={styles.coverImage}>
           <FallbackImage src={profile.coverImage} alt="Cover" />
@@ -318,6 +364,15 @@ const Profile = () => {
                   <span className={styles.infoIcon}>📅</span>
                   <span>Joined {formatDate(profile.joinedDate)}</span>
                 </div>
+
+                <div className={styles.infoItem}>
+                  <span className={styles.infoIcon}>🔍</span>
+                  <span>
+                    {profile.settings?.search_engine_indexing
+                      ? "Indexed by search engines"
+                      : "Not indexed (hidden from search engines)"}
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -421,6 +476,7 @@ const Profile = () => {
       {!isOwnProfile && (
         <ChatWindow
           user={{
+            id: profile.id,
             name: profile.name,
             avatar: profile.avatar,
             username: profile.username,

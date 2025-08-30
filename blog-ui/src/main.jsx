@@ -8,6 +8,8 @@ import { store } from "./store/index.js";
 import "./styles/index.scss";
 import { fetchUserProfile } from "./features/auth/authAsync";
 import { Toaster } from "react-hot-toast";
+import usePusherNotifications from "./hooks/usePusherNotifications";
+import { addNotification } from "./features/notification/notificationSlice";
 
 function App() {
   const dispatch = useDispatch();
@@ -23,6 +25,10 @@ function App() {
 
     fetchUser();
   }, [dispatch]);
+
+  usePusherNotifications((notification) => {
+    dispatch(addNotification(notification));
+  });
 
   return (
     <ErrorBoundary>

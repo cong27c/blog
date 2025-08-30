@@ -43,6 +43,12 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "user_id",
         as: "bookmarks",
       });
+      User.hasOne(models.UserSetting, {
+        foreignKey: "user_id",
+        as: "settings",
+      });
+
+      User.hasMany(models.Message, { foreignKey: "user_id", as: "messages" });
     }
   }
 

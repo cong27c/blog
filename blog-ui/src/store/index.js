@@ -4,13 +4,20 @@ import storage from "redux-persist/lib/storage";
 import logger from "redux-logger";
 
 import authReducer from "@/features/auth/authSlice";
+import notificationReducer from "@/features/notification/notificationSlice";
 const authConfig = {
   key: "auth",
   storage,
 };
 
+const notificationConfig = {
+  key: "notifications",
+  storage,
+};
+
 const rootReducer = combineReducers({
   auth: persistReducer(authConfig, authReducer),
+  notifications: persistReducer(notificationConfig, notificationReducer),
 });
 
 export const store = configureStore({

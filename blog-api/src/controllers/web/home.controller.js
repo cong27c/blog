@@ -3,7 +3,8 @@ const response = require("@/utils/response");
 
 const getFeaturedPostsController = async (req, res) => {
   try {
-    const data = await getFeaturePosts();
+    const userId = req.user.id;
+    const data = await getFeaturePosts(userId);
     response.success(res, 200, data);
   } catch (error) {
     console.log(error);
@@ -12,7 +13,8 @@ const getFeaturedPostsController = async (req, res) => {
 };
 const getLatestPostsController = async (req, res) => {
   try {
-    const data = await getLatestPosts();
+    const userId = req.user.id;
+    const data = await getLatestPosts(userId);
     response.success(res, 200, data);
   } catch (error) {
     console.log(error);

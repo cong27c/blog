@@ -26,6 +26,7 @@ import {
   togglePostLike,
 } from "@/services/homeService";
 import toast from "react-hot-toast";
+import { getAuthorSettings } from "@/services/authServices";
 
 const BlogDetail = () => {
   const { slug } = useParams();
@@ -44,6 +45,42 @@ const BlogDetail = () => {
   const [likeCount, setLikeCount] = useState(0);
   const [bookmarkedPostIds, setBookmarkedPostIds] = useState([]);
   const isBookmarked = bookmarkedPostIds.includes(postId);
+  const [authorId, setAuthorId] = useState(null);
+
+  const [settings, setSettings] = useState({
+    // Account
+
+    confirmPassword: "",
+    twoFactorEnabled: false,
+
+    // Content
+    defaultPostVisibility: "public",
+    allowComments: true,
+    requireCommentApproval: false,
+    showViewCounts: true,
+
+    // Notifications
+    emailNewComments: true,
+    emailNewLikes: true,
+    emailNewFollowers: true,
+    emailWeeklyDigest: true,
+    pushNotifications: true,
+
+    // Privacy
+    profileVisibility: "public",
+    allowDirectMessages: "everyone",
+    searchEngineIndexing: true,
+    showEmail: false,
+  });
+
+  useEffect(() => {
+    if (!authorId) return;
+    const fetchData = async () => {
+      const data = await getAuthorSettings(authorId);
+      setSettings(data);
+    };
+    fetchData();
+  }, []);
 
   const handleToggleLike = async () => {
     if (!postId || likingInProgress) return; // chặn spam
@@ -116,8 +153,9 @@ const BlogDetail = () => {
     const loadPost = async () => {
       setLoading(true);
       try {
-        console.log(slug);
         const blogPost = await getBlogPost(slug);
+
+        setAuthorId(blogPost.author.authorId);
         if (!blogPost) {
           setLoading(false);
           return;
@@ -126,6 +164,7 @@ const BlogDetail = () => {
           Array.isArray(blogPost.topics) ? blogPost.topics : [],
           blogPost?.id
         );
+        console.log(relatedPosts);
 
         const commentsByPost = await getPostComments(slug);
         setPost(blogPost);
@@ -166,7 +205,14 @@ const BlogDetail = () => {
       toast.success("Bình luận đã được thêm!");
     } catch (error) {
       console.error(error);
-      toast.error("Không thể thêm bình luận.");
+      console.log(error.response?.data?.message);
+      if (
+        error.response?.data?.message === "This post does not allow comments"
+      ) {
+        toast.error("Tác giả không cho phép bình luận bài viết này.");
+      } else {
+        toast.error("Không thể thêm bình luận.");
+      }
     }
   };
 
@@ -400,15 +446,21 @@ const BlogDetail = () => {
 
       {/* Comments */}
       <div className={styles.contentSection}>
-        <CommentSection
-          comments={comments}
-          onAddComment={handleAddComment}
-          onReplyComment={handleReplyComment}
-          onLikeComment={handleLikeComment}
-          onEditComment={handleEditComment}
-          onDeleteComment={handleDeleteComment}
-          isAuthenticated={isAuthenticated}
-        />
+        {settings?.allowComments ? (
+          <CommentSection
+            comments={comments}
+            onAddComment={handleAddComment}
+            onReplyComment={handleReplyComment}
+            onLikeComment={handleLikeComment}
+            onEditComment={handleEditComment}
+            onDeleteComment={handleDeleteComment}
+            isAuthenticated={isAuthenticated}
+          />
+        ) : (
+          <p className={styles.commentDisabled}>
+            Bình luận đã bị tắt cho bài viết này.
+          </p>
+        )}
       </div>
     </div>
   );

@@ -11,6 +11,7 @@ import {
   togglePostLike,
 } from "@/services/homeService";
 import toast from "react-hot-toast";
+import { getAuthorSettings } from "@/services/authServices";
 
 const PostCard = ({
   postId,
@@ -202,8 +203,7 @@ const PostCard = ({
         {showInteractions && (
           <div className={styles.interactions}>
             <div className={styles.stats}>
-              {/* View Count */}
-              {showViewCount && views > 0 && (
+              {author?.settings?.show_view_counts && views > 0 && (
                 <span className={styles.stat}>
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                     <path

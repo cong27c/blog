@@ -1,4 +1,4 @@
-const { Bookmark, Post } = require("@/models/index");
+const { Bookmark, Post, UserSetting, User } = require("@/models/index");
 const { where, Op } = require("sequelize");
 
 class BookmarksService {
@@ -19,7 +19,10 @@ class BookmarksService {
     const offset = (page - 1) * limit;
 
     const { count, rows } = await Post.findAndCountAll({
-      where: { status: "published" },
+      where: {
+        status: "published",
+        visibility: "public", // 👈 thêm điều kiện lọc visibility
+      },
       limit,
       offset,
       order: [["created_at", "DESC"]],
@@ -28,6 +31,32 @@ class BookmarksService {
           model: Bookmark,
           where: { user_id: userId },
           attributes: [],
+        },
+        {
+          model: User,
+          as: "author", // Phải đúng alias đã khai báo
+          attributes: ["id", "email", "avatar", ["user_name", "username"]],
+          include: [
+            {
+              model: UserSetting,
+              as: "settings", // alias đã khai báo trong association
+              attributes: [
+                "allow_comments",
+                "show_view_counts",
+                "require_comment_approval",
+                "default_post_visibility",
+                "push_notifications",
+                "email_new_comments",
+                "email_new_likes",
+                "email_new_followers",
+                "email_weekly_digest",
+                "profile_visibility",
+                "allow_direct_messages",
+                "search_engine_indexing",
+                "show_email",
+              ],
+            },
+          ],
         },
       ],
     });

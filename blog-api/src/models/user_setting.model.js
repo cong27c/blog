@@ -38,6 +38,80 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         defaultValue: DataTypes.NOW,
       },
+      two_factor_enabled: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
+      two_factor_secret: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      default_post_visibility: {
+        type: DataTypes.STRING(20),
+        allowNull: false,
+        defaultValue: "public",
+      },
+      allow_comments: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: true,
+      },
+      require_comment_approval: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
+      show_view_counts: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: true,
+      },
+      email_new_comments: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: true,
+      },
+      email_new_likes: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: true,
+      },
+      email_new_followers: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: true,
+      },
+      email_weekly_digest: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: true,
+      },
+      push_notifications: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: true,
+      },
+      profile_visibility: {
+        type: DataTypes.STRING(20),
+        allowNull: false,
+        defaultValue: "public",
+      },
+      allow_direct_messages: {
+        type: DataTypes.STRING(20),
+        allowNull: false,
+        defaultValue: "everyone",
+      },
+      search_engine_indexing: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: true,
+      },
+      show_email: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
     },
     {
       sequelize,

@@ -26,6 +26,7 @@ const Bookmarks = () => {
     setLoading(true);
     try {
       const result = await getMyPostBookmarked(page, postsPerPage);
+      console.log(result);
       setBookmarks(result?.data);
       setTotalPages(Math.ceil(result?.total / postsPerPage));
     } catch (error) {

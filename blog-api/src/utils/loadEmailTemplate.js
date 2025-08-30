@@ -18,6 +18,12 @@ async function loadEmailTemplate(type, template, data) {
       buttonText: "Reset Password",
       url: `http://localhost:5173/reset-password?token=${token}`,
     },
+    "verify-setting": {
+      title: "Verify Your Email",
+      message: "Click the button below to reset your password.",
+      buttonText: "Verify Email-Setting",
+      url: `http://localhost:5173/settings/email/verify?token=${token}`,
+    },
   };
 
   if (!variables[type]) {

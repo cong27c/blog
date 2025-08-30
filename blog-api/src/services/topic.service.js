@@ -17,6 +17,7 @@ class TopicsService {
         {
           model: Post,
           as: "posts",
+          where: { visibility: "public", status: "published" },
         },
       ],
       limit,
@@ -66,8 +67,9 @@ class TopicsService {
 
     // const topic = await Topic.findOne({ where: { slug } });
     // if (!topic) return null;
+    // where: { visibility: "public" },
     const posts = await Post.findAndCountAll({
-      where: { status: "published" },
+      where: { status: "published", visibility: "public" },
       include: [
         {
           model: Topic,

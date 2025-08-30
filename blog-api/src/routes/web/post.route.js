@@ -6,6 +6,7 @@ const authJWT = require("@/middlewares/authJWT");
 router.get("/my-posts", authJWT, postController.getPostsByCurrentUser);
 
 router.get("/status", postController.getPostsByStatus);
-router.get("/posts/topic/:slug", postController.getPostsByTopic);
+router.get("/posts/topic/:slug", authJWT, postController.getPostsByTopic);
+router.post("/posts/schedule", authJWT, postController.schedulePost);
 
 module.exports = router;

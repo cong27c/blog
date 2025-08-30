@@ -4,7 +4,7 @@ const profileController = require("@/controllers/web/profile.controller");
 const authJWT = require("@/middlewares/authJWT");
 
 router.get("/:username", authJWT, profileController.getProfile);
-router.get("/user/:username", profileController.getPostsByCurrentUser);
+router.get("/user/:username", authJWT, profileController.getPostsByCurrentUser);
 router.put("/:username/edit", profileController.updateProfile);
 
 module.exports = router;

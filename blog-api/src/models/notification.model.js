@@ -44,6 +44,15 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING(255),
         allowNull: false,
       },
+      read: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
+      link: {
+        type: DataTypes.STRING(255),
+        allowNull: true,
+      },
       notifiable_type: {
         type: DataTypes.STRING(100),
         allowNull: false,

@@ -4,7 +4,25 @@ const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class Conversation extends Model {
     static associate(models) {
-      // define association here nếu có
+      Conversation.hasMany(models.UserConversation, {
+        foreignKey: "conversation_id",
+        as: "members",
+      });
+
+      Conversation.hasMany(models.UserConversation, {
+        foreignKey: "conversation_id",
+        as: "member1", // user hiện tại
+      });
+
+      Conversation.hasMany(models.UserConversation, {
+        foreignKey: "conversation_id",
+        as: "member2", // recipient
+      });
+
+      Conversation.hasOne(models.Message, {
+        foreignKey: "conversation_id",
+        as: "lastMessage",
+      });
     }
   }
 

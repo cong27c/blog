@@ -4,6 +4,7 @@ import { Input, Button } from "../../components";
 import styles from "./ResetPassword.module.scss";
 import { useDispatch } from "react-redux";
 import { resetPassword } from "@/features/auth/authAsync";
+import toast from "react-hot-toast";
 
 const ResetPassword = () => {
   const [searchParams] = useSearchParams();
@@ -96,10 +97,11 @@ const ResetPassword = () => {
 
     try {
       const data = dispatch(resetPassword(formData));
-      console.log(data);
       if (data) {
         navigate("/");
       }
+      toast.success("Khôi phục mật khẩu thành công!");
+
       setIsSubmitted(true);
     } catch (error) {
       console.error("Password reset failed:", error);

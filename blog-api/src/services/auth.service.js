@@ -1,4 +1,4 @@
-const { User } = require("@/models");
+const { User, UserSetting } = require("@/models/index");
 const { hash, compare } = require("@/utils/bcrypt");
 const jwtService = require("./jwt.service");
 const refreshTokenService = require("./refreshToken.service");
@@ -8,6 +8,8 @@ const { where } = require("sequelize");
 const loadEmailTemplate = require("@/utils/loadEmailTemplate");
 const queue = require("@/utils/queue");
 const throwError = require("@/utils/throwError");
+const speakeasy = require("speakeasy");
+const QRCode = require("qrcode");
 
 /**
  * Register new user
@@ -29,7 +31,14 @@ const register = async (data, res) => {
       throw new Error("Thông tin người dùng không hợp lệ.");
     }
     queue.dispatch("sendVerifyEmailJob", { userId, type: "verify" });
+    await UserSetting.create({ user_id: user.id });
 
+    if (!user.verified_at) {
+      return {
+        message:
+          "Đăng ký thành công. Vui lòng kiểm tra email để xác thực tài khoản.",
+      };
+    }
     const accessToken = jwtService.generateAccessToken(userId);
     const refreshToken = await refreshTokenService.createRefreshToken(userId);
 
@@ -49,30 +58,124 @@ const register = async (data, res) => {
     console.log(error);
   }
 };
+const confirm2FASetup = async (userId, otp) => {
+  try {
+    const userSetting = await UserSetting.findOne({
+      where: { user_id: userId },
+    });
+    if (!userSetting) throw new Error("Không tìm thấy cài đặt user");
+
+    const verified = speakeasy.totp.verify({
+      secret: userSetting.two_factor_secret,
+      encoding: "base32",
+      token: otp,
+      window: 1,
+    });
+    console.log(verified);
+
+    if (!verified) throw new Error("OTP không hợp lệ.");
+
+    await UserSetting.update(
+      { two_factor_enabled: true },
+      { where: { user_id: userId } }
+    );
+
+    return { success: true, message: "Đã bật 2FA thành công" };
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const generate2FASecret = async (userId) => {
+  try {
+    const secret = speakeasy.generateSecret({
+      name: "MyApp (2FA)",
+    });
+    console.log(secret.base32);
+    console.log(userId);
+
+    await UserSetting.update(
+      {
+        two_factor_secret: secret.base32,
+        two_factor_enabled: false,
+      },
+      { where: { user_id: userId } }
+    );
+
+    const qrCodeDataURL = await QRCode.toDataURL(secret.otpauth_url);
+
+    return {
+      secret: secret.base32,
+      qrCode: qrCodeDataURL,
+    };
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 const login = async (email, password) => {
   const user = await User.findOne({ where: { email } });
+  const userSetting = await UserSetting.findOne({
+    where: { user_id: user.id },
+  });
+  if (!user) throw new Error("Thông tin đăng nhập không hợp lệ.");
   if (!user.verified_at) throwError("Email chưa xác thực");
-  if (!user) {
-    throw new Error("Thông tin đăng nhập không hợp lệ.");
-  }
 
   const isValid = await compare(password, user.dataValues.password);
+  if (!isValid) throw new Error("Thông tin đăng nhập không hợp lệ.");
 
-  if (!isValid) {
-    throw new Error("Thông tin đăng nhập không hợp lệ.");
+  // Nếu user chưa bật 2FA → cấp token như bình thường
+  if (!userSetting.two_factor_enabled) {
+    const tokenData = jwtService.generateAccessToken(user.dataValues.id);
+    const refreshToken = await refreshTokenService.createRefreshToken(
+      user.dataValues.id
+    );
+
+    return {
+      ...tokenData,
+      refresh_token: refreshToken.token,
+    };
   }
 
-  const tokenData = jwtService.generateAccessToken(user.dataValues.id);
-
-  const refreshToken = await refreshTokenService.createRefreshToken(
-    user.dataValues.id
-  );
-
+  // Nếu user đã bật 2FA → yêu cầu nhập OTP
   return {
-    ...tokenData,
-    refresh_token: refreshToken.token,
+    require2FA: true,
+    user_id: user.id, // FE dùng để gọi verify OTP
+    message: "Vui lòng nhập mã OTP từ Google Authenticator",
   };
+};
+
+const verifyLoginOtp = async (userId, otp) => {
+  try {
+    const user = await User.findOne({ where: { id: userId } });
+    const userSetting = await UserSetting.findOne({
+      where: { user_id: user.id },
+    });
+    if (!user) throw new Error("Người dùng không tồn tại.");
+    const verified = speakeasy.totp.verify({
+      secret: userSetting.two_factor_secret,
+      encoding: "base32",
+      token: otp,
+      window: 1,
+    });
+
+    if (!verified) {
+      throw new Error("OTP không hợp lệ.");
+    }
+
+    // OTP đúng → cấp JWT và refresh token
+    const tokenData = jwtService.generateAccessToken(user.dataValues.id);
+    const refreshToken = await refreshTokenService.createRefreshToken(
+      user.dataValues.id
+    );
+
+    return {
+      ...tokenData,
+      refresh_token: refreshToken.token,
+    };
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 const verify = async (token) => {
@@ -114,6 +217,24 @@ const resetPassword = async (token, newPassword) => {
     console.log(error);
     throw new Error(error);
   }
+};
+
+const resetPasswordLoggedIn = async (userId, currentPassword, newPassword) => {
+  console.log("currentPassword : ", currentPassword);
+  console.log("newPassword : ", newPassword);
+  const user = await User.findOne({ where: { id: userId } });
+  if (!user) throw new Error("User not found");
+
+  // check current password
+  const isMatch = await compare(currentPassword, user.password);
+  if (!isMatch) throw new Error("Current password is incorrect");
+
+  // hash new password
+  const hashNewPassword = await hash(newPassword);
+
+  await User.update({ password: hashNewPassword }, { where: { id: userId } });
+
+  return true;
 };
 
 /**
@@ -172,7 +293,10 @@ const logout = async (refreshToken) => {
   const deleted = await refreshTokenService.deleteRefreshToken(refreshToken);
   return deleted > 0;
 };
+
 module.exports = {
+  resetPasswordLoggedIn,
+  confirm2FASetup,
   register,
   login,
   refreshAccessToken,
@@ -180,4 +304,6 @@ module.exports = {
   resetPassword,
   forgotPassword,
   logout,
+  verifyLoginOtp,
+  generate2FASecret,
 };

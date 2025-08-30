@@ -6,6 +6,8 @@ import Input from "../Input/Input";
 import Badge from "../Badge/Badge";
 import FallbackImage from "../FallbackImage/FallbackImage";
 import styles from "./PublishModal.module.scss";
+import { postSchedulePost } from "@/services/postService";
+import toast from "react-hot-toast";
 
 const PublishModal = ({
   isOpen,
@@ -53,13 +55,9 @@ const PublishModal = ({
     }));
   };
 
-  const handlePublish = () => {
-    const publishData = {
-      ...formData,
-      isScheduled,
-      publishDate: isScheduled ? publishDate : null,
-    };
-    onPublish(publishData);
+  const handlePublish = async () => {
+    const publishData = { ...formData, isScheduled, publishDate };
+    onPublish(publishData); // chỉ trả data ra ngoài
   };
   if (!isOpen) return null;
 
