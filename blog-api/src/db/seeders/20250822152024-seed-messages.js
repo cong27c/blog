@@ -1,5 +1,7 @@
 "use strict";
 
+const { faker } = require("@faker-js/faker");
+
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
@@ -39,20 +41,17 @@ module.exports = {
       "Send me the link, please.",
     ];
 
-    const validUserIds = [
-      600, 601, 602, 603, 604, 605, 606, 607, 608, 609, 610, 611, 612, 613, 614,
-      615, 616, 617, 618, 619, 620, 621, 622, 623, 624, 625, 626, 627, 628, 629,
-      630, 631, 632, 633, 634, 635, 636, 637, 638, 639, 640, 641, 642, 643, 644,
-      645, 646, 647, 648, 649, 650, 651, 652, 653, 654, 655, 656, 657, 658, 659,
-      660, 661, 662, 663, 664, 665, 666, 667, 668, 669, 670, 671, 672, 673, 674,
-      675, 676, 677, 678, 679, 680, 681, 682, 683, 684, 693, 695, 696,
-    ];
+    // Lấy danh sách user_id từ bảng users (dùng queryInterface)
+    const users = await queryInterface.sequelize.query(
+      `SELECT id FROM users;`,
+      { type: Sequelize.QueryTypes.SELECT }
+    );
 
-    // user_id từ 600 -> 696
-    for (const userId of validUserIds) {
+    // Tạo message cho mỗi user
+    for (const user of users) {
       messages.push({
-        user_id: userId,
-        conversation_id: Math.floor(Math.random() * 10) + 1, // random từ 1 -> 5
+        user_id: user.id,
+        conversation_id: Math.floor(Math.random() * 10) + 1, // random từ 1 -> 10
         type: "text",
         content:
           sampleContents[Math.floor(Math.random() * sampleContents.length)],
