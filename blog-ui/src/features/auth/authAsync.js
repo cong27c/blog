@@ -7,6 +7,8 @@ export const fetchUserProfile = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const res = await axiosInstance.get("/api/v1/auth/me");
+      console.log(res);
+
       return res.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || "Error");
