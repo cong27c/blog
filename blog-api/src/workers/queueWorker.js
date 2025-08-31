@@ -1,4 +1,4 @@
-const sendWeeklyDigestJob = require("@/jobs/sendWeeklyDigestJob");
+const sendWeeklyDigestJob = require("../jobs/sendWeeklyDigestJob");
 const sendVerifyEmailJob = require("../jobs/sendVerifyEmailJob");
 const { Queue } = require("../models");
 const handlers = {
