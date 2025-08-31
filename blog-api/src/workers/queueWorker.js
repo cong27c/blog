@@ -5,7 +5,7 @@ const handlers = {
   sendVerifyEmailJob,
   sendWeeklyDigestJob,
 };
-
+console.log(sendWeeklyDigestJob, sendVerifyEmailJob, Queue);
 async function jobProcess(job) {
   console.log(job);
   const handler = handlers[job.type];

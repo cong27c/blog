@@ -24,7 +24,7 @@ module.exports = (sequelize, DataTypes) => {
       },
     },
     {
-      tableName: "refreshtokens",
+      tableName: "refresh_tokens",
       timestamps: true,
       underscored: true,
       charset: "utf8",
