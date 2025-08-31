@@ -1,6 +1,7 @@
 // src/utils/axiosInstance.js
 
 import axios from "axios";
+console.log(import.meta.env.VITE_BASE_URL);
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_BASE_URL,
   withCredentials: true, // nếu bạn dùng cookie cho refresh token
