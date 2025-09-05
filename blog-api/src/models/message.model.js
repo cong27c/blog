@@ -17,6 +17,7 @@ module.exports = (sequelize, DataTypes) => {
       });
 
       Message.belongsTo(models.User, { foreignKey: "user_id", as: "sender" });
+      Message.belongsTo(models.Agent, { foreignKey: "agent_id" });
     }
   }
 
@@ -31,10 +32,13 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER.UNSIGNED,
         allowNull: false,
       },
+      agent_id: { type: DataTypes.INTEGER.UNSIGNED, allowNull: true },
       conversation_id: {
         type: DataTypes.INTEGER.UNSIGNED,
         allowNull: false,
       },
+      metadata: { type: DataTypes.JSON, allowNull: true },
+
       type: {
         type: DataTypes.STRING(50),
         defaultValue: "text",

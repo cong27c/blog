@@ -5,5 +5,11 @@ const ConversationController = require("@/controllers/web/conversation.controlle
 const authJWT = require("@/middlewares/authJWT");
 
 router.get("/", authJWT, ConversationController.getUserConversations);
+router.post("/", authJWT, ConversationController.createConversation);
+router.post(
+  "/:conversationId/chat",
+  authJWT,
+  ConversationController.chatMessage
+);
 
 module.exports = router;

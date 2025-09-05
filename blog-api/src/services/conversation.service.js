@@ -68,6 +68,18 @@ class ConversationService {
       };
     });
   }
+
+  static async createConversation(userId) {
+    try {
+      const conversation = await Conversation.create({
+        userId,
+      });
+      return conversation;
+    } catch (error) {
+      console.error("ConversationService Error:", error);
+      throw error;
+    }
+  }
 }
 
 module.exports = ConversationService;

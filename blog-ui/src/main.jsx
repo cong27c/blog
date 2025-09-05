@@ -10,6 +10,7 @@ import { fetchUserProfile } from "./features/auth/authAsync";
 import { Toaster } from "react-hot-toast";
 import usePusherNotifications from "./hooks/usePusherNotifications";
 import { addNotification } from "./features/notification/notificationSlice";
+import ChatbotWidget from "./components/ChatbotWidget/ChatbotWidget";
 
 function App() {
   const dispatch = useDispatch();
@@ -35,6 +36,8 @@ function App() {
       <BrowserRouter>
         <ScrollToTop>
           <AppRoutes />
+          <ChatbotWidget />
+
           <Toaster position="top-right" reverseOrder={false} />
         </ScrollToTop>
       </BrowserRouter>

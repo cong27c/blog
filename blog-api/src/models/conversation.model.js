@@ -23,6 +23,7 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "conversation_id",
         as: "lastMessage",
       });
+      Conversation.belongsTo(models.Agent, { foreignKey: "agent_id" });
     }
   }
 
@@ -41,6 +42,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING(255),
         allowNull: true,
       },
+      agent_id: { type: DataTypes.INTEGER.UNSIGNED, allowNull: true },
+      type: { type: DataTypes.STRING, defaultValue: "agent" },
+      context: { type: DataTypes.JSON, allowNull: true },
+      status: { type: DataTypes.STRING, defaultValue: "active" },
       last_message_at: {
         type: DataTypes.DATE,
         allowNull: true,
